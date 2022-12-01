@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <array>
 #include <algorithm>
 #include <cassert>
@@ -151,7 +152,28 @@ void solve(const Input& _input)
                             for (auto& score : day_field->subnodes)
                             {
                                 int32_t part = std::stol(score->name);
-                                person_daily_scores[day - 1][part - 1] = std::stoll(score->subnodes[0]->value);
+                                if (score->subnodes.size() == 1)
+                                {
+                                    person_daily_scores[day - 1][part - 1] = std::stoll(score->subnodes[0]->value);
+                                }
+                                else if (score->subnodes.size() == 2)
+                                {
+                                    if (score->subnodes[0]->name == "get_star_ts")
+                                    {
+                                        person_daily_scores[day - 1][part - 1] = std::stoll(score->subnodes[0]->value);
+                                    }
+                                    else if (score->subnodes[1]->name == "get_star_ts")
+                                    {
+                                        person_daily_scores[day - 1][part - 1] = std::stoll(score->subnodes[1]->value);
+                                    }
+                                    else
+                                    {
+                                        outf("-------- unhandled json format time node name changed ----");
+                                    }
+                                }
+                                else {
+                                    outf("-------- unhandled json format ----");
+                                }
                             }
                         }
                     }
@@ -190,6 +212,7 @@ void solve(const Input& _input)
         }
 
         {
+            outf("\x1b[0m");
             outf("\nDay {:2} part {} results: =============================== \n", day, 1);
             int32_t count = 0;
             std::sort(day_results.begin(), day_results.end(), [](auto a, auto b) { return a.prob1_time < b.prob1_time; });
@@ -197,12 +220,21 @@ void solve(const Input& _input)
             {
                 if (e.prob1_time != 0)
                 {
+                    if (count % 2 == 0)
+                    {
+                        outf("\x1b[38;5;179m");
+                    }
+                    else
+                    {
+                        outf("\x1b[38;5;209m");
+                    }
                     outf("{:3} {:32}", ++count, e.name);
                     std::cout << " " << std::put_time(std::localtime(&e.prob1_time), "%H:%M:%S %y.%m.%d") << "\n";
                 }
             }
         }
         {
+            outf("\x1b[0m");
             outf("\nDay {:2} part {} results: ------------------------------- \n", day, 2);
             int32_t count = 0;
             std::sort(day_results.begin(), day_results.end(), [](auto a, auto b) { return a.prob2_time < b.prob2_time; });
@@ -210,6 +242,14 @@ void solve(const Input& _input)
             {
                 if (e.prob2_time != 0)
                 {
+                    if (count % 2 == 0)
+                    {
+                        outf("\x1b[38;5;179m");
+                    }
+                    else
+                    {
+                        outf("\x1b[38;5;209m");
+                    }
                     outf("{:3} {:32}", ++count, e.name);
                     std::cout << " " << std::put_time(std::localtime(&e.prob2_time), "%H:%M:%S %y.%m.%d") << "\n";
                 }
