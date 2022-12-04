@@ -3,12 +3,16 @@
 #include <algorithm>
 #include <cassert>
 #include <ctime>
-#include <iostream>
+#include <fcntl.h>
+#include <io.h>
 #include <iomanip>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <Windows.h>
+
 #include "outf.h"
 
 using Input = std::vector<std::string>;
@@ -206,10 +210,14 @@ void solve(const Input& _input)
             int64_t prob2_time;
         };
         std::vector<Day_Result> day_results;
+        bool anything_to_print = false;
         for (auto& [name, times] : time_board)
         {
+            anything_to_print = anything_to_print || times[day - 1][0] != 0 || times[day - 1][1] != 0;
             day_results.push_back({ name, times[day - 1][0], times[day - 1][1] });
         }
+        if (!anything_to_print)
+            continue;
 
         {
             outf("\x1b[0m");
@@ -228,7 +236,15 @@ void solve(const Input& _input)
                     {
                         outf("\x1b[38;5;209m");
                     }
-                    outf("{:3} {:32}", ++count, e.name);
+                    //outf("{:3} {:32}", ++count, e.name);
+                    // :( std::format has no real support for u8string ...
+                    wchar_t str[256];
+                    int num_chars = MultiByteToWideChar(CP_UTF8, 0, e.name.c_str(), (int)e.name.size(), str, 256);
+                    str[num_chars] = 0;
+                    outf("{:3} ", ++count);
+                    _setmode(_fileno(stdout), _O_WTEXT);
+                    std::wcout << std::left << std::setw(32) << str;
+                    _setmode(_fileno(stdout), _O_TEXT);
                     std::cout << " " << std::put_time(std::localtime(&e.prob1_time), "%H:%M:%S %y.%m.%d") << "\n";
                 }
             }
@@ -250,7 +266,14 @@ void solve(const Input& _input)
                     {
                         outf("\x1b[38;5;209m");
                     }
-                    outf("{:3} {:32}", ++count, e.name);
+                    wchar_t str[256];
+                    int num_chars = MultiByteToWideChar(CP_UTF8, 0, e.name.c_str(), (int)e.name.size(), str, 256);
+                    str[num_chars] = 0;
+                    //outf("{:3} {:32}", ++count, e.name);
+                    outf("{:3} ", ++count);
+                    _setmode(_fileno(stdout), _O_WTEXT);
+                    std::wcout << std::left << std::setw(32) << str;
+                    _setmode(_fileno(stdout), _O_TEXT);
                     std::cout << " " << std::put_time(std::localtime(&e.prob2_time), "%H:%M:%S %y.%m.%d") << "\n";
                 }
             }
@@ -260,6 +283,7 @@ void solve(const Input& _input)
 
 int main()
 {
+    outf("[Don't forget to pipe in the aoc leaderboard json file.]\n");
     auto input = read_input();
     solve(input);
 
