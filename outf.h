@@ -6,7 +6,7 @@
 #include <vector>
 
 template <typename ...Args>
-void outf(const std::_Fmt_string<Args...> format_str, Args&&... args)
+void outf(const std::format_string<Args...> format_str, Args&&... args)
 {
     std::cout << std::format(format_str, std::forward<Args>(args)...);
 }
