@@ -7,6 +7,35 @@
 #include <utility>
 #include <vector>
 
+////////////////////////
+// declarations
+
+template <typename ...Args>
+void outf(const std::format_string<Args...> format_str, Args&&... args);
+
+template <typename T>
+std::pair<int32_t, int32_t> find_periodicity(std::vector<T> vec, int32_t max_period_size = 100, int32_t min_period_size = 1);
+
+std::vector<std::string> split_string(std::string_view str, const std::string_view separator);
+
+std::vector<std::int64_t> split_string_and_convert_to_numbers(std::string_view str, const std::string_view separator);
+
+std::vector<std::int64_t> split_string_and_convert_to_numbers(std::string_view str, const std::string_view separator);
+
+void add_padding(std::vector<std::string>& grid, char fill_char, size_t thickness);
+
+using Interval = std::pair<int64_t, int64_t>;
+using Interval_Vector = std::vector<Interval>;
+
+void intersect_diff_intervals(const Interval& i1, const Interval& i2, Interval_Vector& intersection, Interval_Vector& difference);
+
+
+
+
+
+////////////////////////
+// implementations;
+
 template <typename ...Args>
 void outf(const std::format_string<Args...> format_str, Args&&... args)
 {
@@ -49,7 +78,6 @@ std::vector<std::int64_t> split_string_and_convert_to_numbers(std::string_view s
     return result;
 }
 
-
 void add_padding(std::vector<std::string>& grid, char fill_char, size_t thickness)
 {
     std::string filler_horizontal(thickness, fill_char);
@@ -70,10 +98,6 @@ void add_padding(std::vector<std::string>& grid, char fill_char, size_t thicknes
         grid.insert(grid.end(), filler_row);
     }
 }
-
-
-using Interval = std::pair<int64_t, int64_t>;
-using Interval_Vector = std::vector<Interval>;
 
 void intersect_diff_intervals(const Interval& i1, const Interval& i2, Interval_Vector& intersection, Interval_Vector& difference)
 {
@@ -123,4 +147,48 @@ void intersect_diff_intervals(const Interval& i1, const Interval& i2, Interval_V
 		assert(i1.first >= i2.first && i1.second <= i2.second);
 		intersection.push_back(i1);
 	}
+}
+
+template <typename T>
+std::pair<int32_t, int32_t> find_periodicity(std::vector<T> vec, int32_t max_period_size, int32_t min_period_size)
+{
+	int32_t period_start = -1;
+	int32_t period = -1;
+
+	for (int32_t period_size = min_period_size; period_size < max_period_size; period_size++)
+	{
+		bool found = true;
+		for (int32_t i = 0; i < period_size; i++)
+		{
+			if (vec[vec.size() - 1 - i] != vec[vec.size() - 1 - period_size - i])
+			{
+				found = false;
+				break;
+			}
+		}
+		if (found)
+		{
+			period = period_size;
+			break;
+		}
+	}
+
+	for (int32_t i = 0; i < vec.size(); i++)
+	{
+		bool found = true;
+		for (int32_t k = 0; k < period; k++)
+		{
+			if (vec[i + k] != vec[i + period + k])
+			{
+				found = false;
+			}
+		}
+		if (found)
+		{
+			period_start = i;
+			break;
+		}
+	}
+
+	return { period_start, period };
 }
